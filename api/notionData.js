@@ -8,6 +8,11 @@ const notionApiKey = process.env.NOTION_API_KEY;
 
 app.get('/api/notionData', async (req, res) => {
   try {
+    // Aggiungi le intestazioni CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
     const response = await fetch(notionApiUrl, {
       method: 'POST',
       headers: {
