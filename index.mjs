@@ -9,6 +9,10 @@ const notionApiKey = process.env.NOTION_API_KEY;
 
 app.get('/notion-data', async (req, res) => {
   try {
+    console.log("Inizio della richiesta all'API di Notion");
+    console.log("notionApiUrl:", notionApiUrl);
+    console.log("notionApiKey:", notionApiKey ? 'API Key presente' : 'API Key mancante');
+
     const response = await fetch(notionApiUrl, {
       method: 'POST',
       headers: {
@@ -18,12 +22,14 @@ app.get('/notion-data', async (req, res) => {
       }
     });
 
-    if (!response.ok) throw new Error('Errore nella chiamata all\'API di Notion');
+    console.log("Risposta ricevuta dall'API di Notion:", response.status);
+
+    if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
     
     const data = await response.json();
     res.status(200).json(data);
   } catch (error) {
-    console.error(error);
+    console.error("Errore durante il recupero dei dati da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati da Notion' });
   }
 });
