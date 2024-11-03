@@ -8,7 +8,6 @@ const notionApiKey = process.env.NOTION_API_KEY;
 
 app.get('/api/notionData', async (req, res) => {
   try {
-    // Aggiungi le intestazioni CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -24,8 +23,22 @@ app.get('/api/notionData', async (req, res) => {
 
     if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
     
-    const data = await response.json();
-    res.status(200).json(data);
+    const notionData = await response.json();
+    
+    // Estrai i dati dall'array `results`
+    const extractedData = notionData.results.map(item => {
+      return {
+        id: item.id,
+        promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "", // Estrarre il titolo
+        contenuto: item.properties["Contenuto"].rich_text[0]?.plain_text || "", // Estrarre il contenuto
+        link: item.properties["Link"].rich_text[0]?.plain_text || "", // Estrarre il link
+        excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "", // Estrarre l'excerpt
+        tag: item.properties["Tag"].select?.name || "" // Estrarre il tag
+      };
+    });
+
+    // Invia solo i dati estratti
+    res.status(200).json(extractedData);
   } catch (error) {
     console.error("Errore durante il recupero dei dati da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati da Notion' });
