@@ -1,10 +1,13 @@
 const fetch = require('node-fetch');
 
+
+
+
 // Endpoint principale per Vercel
 module.exports = async (req, res) => {
   // Configura l'URL e la chiave API di Notion
-  const notionApiUrl = '133863224739800488dacadc7e93c08e';
-  const notionApiKey = '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';
+  const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_DATABASE_ID}/query`;
+  const notionApiKey = process.env.NOTION_API_KEY;
 
   try {
     const response = await fetch(notionApiUrl, {
