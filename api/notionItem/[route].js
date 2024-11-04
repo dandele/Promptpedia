@@ -5,12 +5,31 @@ const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
   const { route } = req.query;
-  console.log("Valore route ricevuto:", route); // Log per confermare il valore di route
   
+  // Log per verificare il valore di `route`
+  console.log("Valore route ricevuto:", route);
+
+  // Controllo per verificare che `route` sia definito
+  if (!route) {
+    return res.status(400).json({ error: 'Parametro route mancante o non valido' });
+  }
+
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    const bodyData = {
+      filter: {
+        property: "pageUrl",
+        formula: {
+          string: {
+            equals: route // Passa il valore di route nel filtro
+          }
+        }
+      }
+    };
+    console.log("Corpo della richiesta per Notion API:", JSON.stringify(bodyData, null, 2));
 
     const response = await fetch(notionApiUrl, {
       method: 'POST',
@@ -19,22 +38,16 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         'Notion-Version': '2022-06-28'
       },
-      body: JSON.stringify({
-        filter: {
-          property: "pageUrl",
-          formula: {
-            string: {
-              equals: route
-            }
-          }
-        }
-      })
+      body: JSON.stringify(bodyData)
     });
 
-    const data = await response.json();
-    console.log("Risultato query Notion:", JSON.stringify(data, null, 2)); // Log per vedere la risposta completa
+    console.log("Status della risposta Notion:", response.status);
 
     if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
+    
+    const data = await response.json();
+    console.log("Risultato della risposta Notion:", JSON.stringify(data, null, 2));
+
     if (data.results.length === 0) {
       return res.status(404).json({ error: 'Item non trovato' });
     }
