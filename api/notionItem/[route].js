@@ -4,7 +4,8 @@ const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_D
 const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
-  const { route } = req.query; // Usa "route" come valore di pageUrl
+  const { route } = req.query;
+  console.log("Valore route:", route); // Log per confermare il valore di route
   
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -30,18 +31,16 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
-
     const data = await response.json();
+    console.log("Risultato query Notion:", JSON.stringify(data, null, 2)); // Log per vedere la risposta completa
 
-    // Verifica se l'item è stato trovato
+    if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
     if (data.results.length === 0) {
       return res.status(404).json({ error: 'Item non trovato' });
     }
 
     const item = data.results[0];
 
-    // Estrai le proprietà necessarie
     const extractedItem = {
       id: item.id,
       promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "",
