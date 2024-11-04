@@ -46,7 +46,8 @@ app.get('/api/notionData', async (req, res) => {
       contenuto: item.properties["Contenuto"].rich_text[0]?.plain_text || "",
       link: item.properties["Link"].rich_text[0]?.plain_text || "",
       excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
-      tag: item.properties["Tag"].select?.name || ""
+      tag: item.properties["Tag"].select?.name || "",
+      pageUrl: item.properties["pageUrl"].formula?.string || ""
     }));
 
     res.status(200).json(extractedData);
