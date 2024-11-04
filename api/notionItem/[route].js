@@ -5,7 +5,7 @@ const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
   const { route } = req.query;
-  console.log("Valore route:", route); // Log per confermare il valore di route
+  console.log("Valore route ricevuto:", route); // Log per confermare il valore di route
   
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');

@@ -1,16 +1,23 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "api/notionData.js",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/api/notionData",
-        "dest": "api/notionData.js"
-      }
-    ]
-  }
-  
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/notionData.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/notionItem/[route].js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/notionData",
+      "dest": "api/notionData.js"
+    },
+    {
+      "src": "/api/notionItem/(.*)",
+      "dest": "api/notionItem/[route].js"
+    }
+  ]
+}
