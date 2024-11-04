@@ -4,11 +4,12 @@ const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_D
 const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
-  // Log per verificare il contenuto della richiesta
-  console.log("Intera richiesta:", req.url);
-  console.log("Valore di req.query:", req.query);
-  const { route } = req.query;
+  const { route } = req.params; // Usa req.params per accedere ai parametri di percorso dinamici
   
+  // Log per verificare il valore di `route`
+  console.log("Valore route ricevuto:", route);
+
+  // Controllo per verificare che `route` sia definito
   if (!route) {
     console.error("Errore: parametro route mancante o non valido");
     return res.status(400).json({ error: 'Parametro route mancante o non valido' });
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
         property: "pageUrl",
         formula: {
           string: {
-            equals: route
+            equals: route // Passa il valore di route nel filtro
           }
         }
       }
