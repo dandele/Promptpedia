@@ -5,13 +5,12 @@ const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
   const { route } = req.query; // Usa "route" come valore di pageUrl
-
+  
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    // Effettua una query al database per cercare il record con pageUrl uguale a "route"
     const response = await fetch(notionApiUrl, {
       method: 'POST',
       headers: {
