@@ -16,7 +16,7 @@ app.get('/api/notionData', async (req, res) => {
     let hasMore = true;
     let nextCursor = undefined;
 
-    // Loop per ottenere tutte le pagine
+    // Loop per ottenere tutte le pagine con i filtri applicati
     while (hasMore) {
       const response = await fetch(notionApiUrl, {
         method: 'POST',
@@ -27,7 +27,23 @@ app.get('/api/notionData', async (req, res) => {
         },
         body: JSON.stringify({
           page_size: 100, // Limite massimo per Notion
-          start_cursor: nextCursor // Usa il cursore per le pagine successive
+          start_cursor: nextCursor, // Usa il cursore per le pagine successive
+          filter: {
+            and: [
+              {
+                property: "Prompt Title",
+                title: {
+                  does_not_equal: "Titolo del prompt non trovato."
+                }
+              },
+              {
+                property: "Contenuto",
+                rich_text: {
+                  does_not_equal: "Contenuto non trovato."
+                }
+              }
+            ]
+          }
         })
       });
 
