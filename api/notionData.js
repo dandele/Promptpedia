@@ -61,14 +61,13 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     // Estrai i dati rilevanti
-    const extractedData = data.results.map(item => ({
+    const extractedData = results.map(item => ({
       id: item.id,
-      promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "",
-      contenuto: item.properties["Contenuto"].rich_text[0]?.plain_text || "",
-      link: item.properties["Link"].rich_text[0]?.plain_text || "",
-      excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
+      promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "Untitled",
       tag: item.properties["Tag"].select?.name || "",
-      pageUrl: item.properties["pageUrl"].formula?.string || ""
+      excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
+      dynamicUrl: item.properties["pageUrl"].formula?.string || "#",
+      dynamicTarget: "_blank" // Modifica se necessario
     }));
 
     const responseData = {
