@@ -1,15 +1,7 @@
-import fetch from 'node-fetch';
-
-const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_DATABASE_ID}/query`;
-const notionApiKey = process.env.NOTION_API_KEY;
-
 export default async function handler(req, res) {
-  // Estrai `route` dall'URL manualmente
-  const route = req.url.split("/").pop();
-  console.log("Valore route ricevuto manualmente:", route);
+  const { route } = req.query;
 
   if (!route) {
-    console.error("Errore: parametro route mancante o non valido");
     return res.status(400).json({ error: 'Parametro route mancante o non valido' });
   }
 
@@ -28,7 +20,6 @@ export default async function handler(req, res) {
         }
       }
     };
-    console.log("Corpo della richiesta per Notion API:", JSON.stringify(bodyData, null, 2));
 
     const response = await fetch(notionApiUrl, {
       method: 'POST',
@@ -43,7 +34,6 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
     
     const data = await response.json();
-    console.log("Risultato della risposta Notion:", JSON.stringify(data, null, 2));
 
     if (data.results.length === 0) {
       return res.status(404).json({ error: 'Item non trovato' });
@@ -55,7 +45,8 @@ export default async function handler(req, res) {
       id: item.id,
       promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "",
       contenuto: item.properties["Contenuto"].rich_text[0]?.plain_text || "",
-      link: item.properties["Link"].rich_text[0]?.plain_text || "",
+      pageUrl: item.properties["pageUrl"].formula?.string || "#", // Usa `pageUrl`
+      link: item.properties["Link"].rich_text[0]?.plain_text || "#", // Usa `link`
       excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
       tag: item.properties["Tag"].select?.name || ""
     };
