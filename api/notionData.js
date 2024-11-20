@@ -1,8 +1,3 @@
-import fetch from 'node-fetch';
-
-const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_DATABASE_ID}/query`;
-const notionApiKey = process.env.NOTION_API_KEY;
-
 export default async function handler(req, res) {
   try {
     // Configura le intestazioni CORS
@@ -10,13 +5,9 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    // Inizializza l'array dei risultati
-    let results = [];
-
     const { cursor } = req.query; // Ottieni il cursore dalla query string
     const pageSize = 20; // Limita i risultati a 20 per richiesta
 
-    // Esegui la richiesta a Notion
     const response = await fetch(notionApiUrl, {
       method: 'POST',
       headers: {
@@ -26,7 +17,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         page_size: pageSize,
-        start_cursor: cursor || undefined, // Usa il cursore fornito o inizia dall'inizio
+        start_cursor: cursor || undefined,
         filter: {
           and: [
             {
@@ -49,24 +40,18 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
 
     const data = await response.json();
-    results = data.results; // Memorizza i risultati dalla risposta Notion
 
     // Estrai i dati rilevanti
-    const extractedData = results.map(item => ({
-      id: item.id,
+    const extractedData = data.results.map(item => ({
       promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "Untitled",
       tag: item.properties["Tag"].select?.name || "",
       excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
       dynamicUrl: item.properties["pageUrl"].formula?.string || "#",
-      dynamicTarget: "_blank" // Modifica se necessario
+      dynamicTarget: "_blank"
     }));
 
-    // Invia i dati al client
-    res.status(200).json({
-      results: extractedData,
-      nextCursor: data.next_cursor,
-      hasMore: data.has_more
-    });
+    // Restituisci solo l'array dei dati
+    res.status(200).json(extractedData);
   } catch (error) {
     console.error("Errore durante il recupero dei dati da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati da Notion' });
