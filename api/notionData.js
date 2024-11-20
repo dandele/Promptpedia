@@ -1,5 +1,15 @@
 app.get('/api/notionData', async (req, res) => {
   try {
+      // Configura le intestazioni CORS
+    res.setHeader('Access-Control-Allow-Origin', 'https://promptpedia.uncrn.co'); // Permetti richieste solo da questo dominio
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    let results = [];
+    let hasMore = true;
+    let nextCursor = undefined;
+
+
     const { cursor } = req.query; // Ottieni il cursore dalla query string
 
     const response = await fetch(notionApiUrl, {
