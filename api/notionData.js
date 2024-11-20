@@ -1,3 +1,9 @@
+import fetch from 'node-fetch';
+
+// Verifica che le variabili di ambiente siano definite
+const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_DATABASE_ID}/query`;
+const notionApiKey = process.env.NOTION_API_KEY;
+
 export default async function handler(req, res) {
   try {
     // Configura le intestazioni CORS
@@ -7,6 +13,11 @@ export default async function handler(req, res) {
 
     const { cursor } = req.query; // Ottieni il cursore dalla query string
     const pageSize = 20; // Limita i risultati a 20 per richiesta
+
+    // Verifica che l'URL dell'API e la chiave siano definiti
+    if (!notionApiUrl || !notionApiKey) {
+      throw new Error('Le variabili di ambiente NOTION_DATABASE_ID o NOTION_API_KEY non sono definite.');
+    }
 
     const response = await fetch(notionApiUrl, {
       method: 'POST',
