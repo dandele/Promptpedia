@@ -4,12 +4,16 @@ const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_D
 const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
+  // Log per il debug
+  console.log('URL ricevuto:', req.url); // Mostra l'intero URL
+  console.log('Query ricevuta:', req.query); // Mostra i parametri query
+
   // Estrai `route` dal percorso dinamico
-  const { route } = req.query; // Questo usa il routing dinamico fornito da Vercel
+  const route = req.url.split('/').pop(); // Prendi l'ultima parte del percorso
+  console.log('Route estratto manualmente:', route); // Log per il debug
 
-  console.log('Valore route ricevuto:', route); // Debug
-
-  if (!route) {
+  // Verifica che il parametro `route` sia valido
+  if (!route || route === 'notionItem') {
     return res.status(400).json({ error: 'Parametro route mancante o non valido' });
   }
 
@@ -18,13 +22,9 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    if (!notionApiUrl || !notionApiKey) {
-      throw new Error('Le variabili di ambiente NOTION_DATABASE_ID o NOTION_API_KEY non sono definite.');
-    }
-
     const bodyData = {
       filter: {
-        property: "pageUrl", // Filtra usando `pageUrl`
+        property: "pageUrl",
         formula: {
           string: {
             equals: route
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       }
     };
 
-    console.log('Query Notion:', bodyData); // Debug
+    console.log('Query Notion:', bodyData); // Log per la query API
 
     const response = await fetch(notionApiUrl, {
       method: 'POST',
@@ -46,8 +46,9 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
-    
+
     const data = await response.json();
+    console.log('Risultato Notion:', data); // Log per la risposta API
 
     if (data.results.length === 0) {
       return res.status(404).json({ error: 'Item non trovato' });
@@ -65,10 +66,10 @@ export default async function handler(req, res) {
       tag: item.properties["Tag"].select?.name || ""
     };
 
-    console.log('Item estratto:', extractedItem); // Debug
+    console.log('Item estratto:', extractedItem); // Debug per il risultato
     res.status(200).json(extractedItem);
   } catch (error) {
-    console.error("Errore dettagliato:", error);
+    console.error("Errore durante il recupero dei dati dell'item da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati dell\'item da Notion' });
   }
 }
