@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     const { cursor } = req.query; // Ottieni il cursore dalla query string
-    const pageSize = 40; // Limita i risultati a 20 per richiesta
+    // const pageSize = 40; // Limita i risultati a 20 per richiesta
 
     // Verifica che l'URL dell'API e la chiave siano definiti
     if (!notionApiUrl || !notionApiKey) {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         'Notion-Version': '2022-06-28'
       },
       body: JSON.stringify({
-        page_size: pageSize,
+        // page_size: pageSize,
         start_cursor: cursor || undefined,
         filter: {
           and: [
