@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     const { cursor } = req.query; // Ottieni il cursore dalla query string
-    console.log("Cursor ricevuto:", cursor); // Log del cursore ricevutoo
+    console.log("Cursor ricevuto:", cursor); // Log del cursore ricevutooo
     const pageSize = 20;
 
     if (!notionApiUrl || !notionApiKey) {
