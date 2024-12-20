@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 
+// Verifica che le variabili di ambiente siano definite
 const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_DATABASE_ID}/query`;
 const notionApiKey = process.env.NOTION_API_KEY;
 
@@ -11,9 +12,9 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     const { cursor } = req.query; // Ottieni il cursore dalla query string
-    console.log("Cursor ricevuto:", cursor); // Log del cursore ricevutooooo
-    const pageSize = 20;
+    const pageSize = 20; // Limita i risultati a 20 per richiesta
 
+    // Verifica che l'URL dell'API e la chiave siano definiti
     if (!notionApiUrl || !notionApiKey) {
       throw new Error('Le variabili di ambiente NOTION_DATABASE_ID o NOTION_API_KEY non sono definite.');
     }
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         page_size: pageSize,
-        start_cursor: cursor || undefined, // Usa il cursore solo se definito
+        start_cursor: cursor || undefined,
         filter: {
           and: [
             {
@@ -47,14 +48,11 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!response.ok) {
-      console.error(`Errore HTTP da Notion: ${response.status} - ${response.statusText}`);
-      throw new Error(`Errore HTTP da Notion: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
 
     const data = await response.json();
-    console.log("Risposta di Notion:", JSON.stringify(data, null, 2)); // Log completo della risposta API
 
+    // Estrai i dati rilevanti
     const extractedData = data.results.map(item => ({
       promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "Untitled",
       tag: item.properties["Tag"].select?.name || "",
@@ -63,13 +61,8 @@ export default async function handler(req, res) {
       dynamicTarget: "_blank"
     }));
 
-    console.log("Dati estratti:", extractedData); // Log dei dati estratti
-
-    res.status(200).json({
-      results: extractedData,
-      nextCursor: data.next_cursor || null,
-      hasMore: data.has_more || false
-    });
+    // Restituisci solo l'array dei dati
+    res.status(200).json(extractedData);
   } catch (error) {
     console.error("Errore durante il recupero dei dati da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati da Notion' });
