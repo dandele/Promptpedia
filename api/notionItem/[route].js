@@ -4,14 +4,10 @@ const notionApiUrl = `https://api.notion.com/v1/databases/${process.env.NOTION_D
 const notionApiKey = process.env.NOTION_API_KEY;
 
 export default async function handler(req, res) {
-  // Verifica se `route` viene passato da Unicorn
-  let { route } = req.query;
+  // Estrai `route` dal percorso dinamico
+  const { route } = req.query; // Questo usa il routing dinamico fornito da Vercel
 
-  // Se `route` non è presente, prova a estrarlo manualmente da `req.url`
-  if (!route) {
-    route = req.url.split('/').pop(); // Estrai manualmente dal percorso
-    console.log('Route estratto manualmente:', route); // Debug
-  }
+  console.log('Valore route ricevuto:', route); // Debug
 
   if (!route) {
     return res.status(400).json({ error: 'Parametro route mancante o non valido' });
@@ -22,9 +18,13 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+    if (!notionApiUrl || !notionApiKey) {
+      throw new Error('Le variabili di ambiente NOTION_DATABASE_ID o NOTION_API_KEY non sono definite.');
+    }
+
     const bodyData = {
       filter: {
-        property: "pageUrl",
+        property: "pageUrl", // Filtra usando `pageUrl`
         formula: {
           string: {
             equals: route
@@ -32,6 +32,8 @@ export default async function handler(req, res) {
         }
       }
     };
+
+    console.log('Query Notion:', bodyData); // Debug
 
     const response = await fetch(notionApiUrl, {
       method: 'POST',
@@ -56,7 +58,7 @@ export default async function handler(req, res) {
     const extractedItem = {
       id: item.id,
       promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "",
-      contenuto: item.properties["Contenuto"].rich_text[0]?.plain_text || "",
+      content: item.properties["Contenuto"].rich_text[0]?.plain_text || "",
       pageUrl: item.properties["pageUrl"].formula?.string || "#",
       link: item.properties["Link"]?.rich_text[0]?.plain_text || "#",
       excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
@@ -67,9 +69,6 @@ export default async function handler(req, res) {
     res.status(200).json(extractedItem);
   } catch (error) {
     console.error("Errore dettagliato:", error);
-    res.status(500).json({ 
-      error: 'Errore durante il recupero dei dati dell\'item da Notion',
-      message: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ error: 'Errore durante il recupero dei dati dell\'item da Notion' });
   }
 }
