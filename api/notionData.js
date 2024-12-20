@@ -14,7 +14,6 @@ export default async function handler(req, res) {
     const { cursor } = req.query; // Ottieni il cursore dalla query string
     const pageSize = 20; // Limita i risultati a 20 per richiesta
 
-    // Verifica che l'URL dell'API e la chiave siano definiti
     if (!notionApiUrl || !notionApiKey) {
       throw new Error('Le variabili di ambiente NOTION_DATABASE_ID o NOTION_API_KEY non sono definite.');
     }
@@ -61,8 +60,12 @@ export default async function handler(req, res) {
       dynamicTarget: "_blank"
     }));
 
-    // Restituisci solo l'array dei dati
-    res.status(200).json(extractedData);
+    // Restituisci i risultati con `nextCursor` e `hasMore`
+    res.status(200).json({
+      results: extractedData,
+      nextCursor: data.next_cursor || null,
+      hasMore: data.has_more || false
+    });
   } catch (error) {
     console.error("Errore durante il recupero dei dati da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati da Notion' });
