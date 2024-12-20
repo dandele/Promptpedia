@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       promptTitle: item.properties["Prompt Title"].title[0]?.plain_text || "Untitled",
       tag: item.properties["Tag"].select?.name || "",
       excerpt: item.properties["Excerpt"].rich_text[0]?.plain_text || "",
-      dynamicUrl: item.properties["pageUrl"].formula?.string || "#",
+      pageUrl: item.properties["pageUrl"].formula?.string || "#",
       dynamicTarget: "_blank"
     }));
 
