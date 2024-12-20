@@ -10,6 +10,9 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+    // Configura la cache
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
+
     let results = [];
     let hasMore = true;
     let nextCursor = undefined;
