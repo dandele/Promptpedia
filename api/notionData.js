@@ -12,7 +12,6 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     const { cursor } = req.query; // Ottieni il cursore dalla query string
-    console.log("Cursor ricevuto:", cursor); // Log del cursore ricevuto
     const pageSize = 20; // Limita i risultati a 20 per richiesta
 
     // Verifica che l'URL dell'API e la chiave siano definiti
@@ -52,7 +51,6 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error(`Errore nella chiamata all'API di Notion, status: ${response.status}`);
 
     const data = await response.json();
-    console.log("Risposta di Notion:", JSON.stringify(data, null, 2)); // Log completo della risposta API
 
     // Estrai i dati rilevanti
     const extractedData = data.results.map(item => ({
@@ -63,14 +61,8 @@ export default async function handler(req, res) {
       dynamicTarget: "_blank"
     }));
 
-    console.log("Dati estratti:", extractedData); // Log dei dati estratti
-
     // Restituisci solo l'array dei dati
-    res.status(200).json({
-        results: extractedData,
-        nextCursor: data.next_cursor || null,
-        hasMore: data.has_more || false
-      });
+    res.status(200).json(extractedData);
   } catch (error) {
     console.error("Errore durante il recupero dei dati da Notion:", error);
     res.status(500).json({ error: 'Errore durante il recupero dei dati da Notion' });
